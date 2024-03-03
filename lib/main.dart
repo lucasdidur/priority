@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:priority/alert_controller.dart';
 
 import 'alert_messenger.dart';
 
 void main() => runApp(const AlertPriorityApp());
+
+AlertController store = AlertController();
 
 class AlertPriorityApp extends StatelessWidget {
   const AlertPriorityApp({super.key});
@@ -35,13 +39,15 @@ class AlertPriorityApp extends StatelessWidget {
                     Expanded(
                       flex: 3,
                       child: Center(
-                        child: Text(
-                          '<Adicione o texto do alerta de prioridade aqui>',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 16.0,
-                          ),
-                        ),
+                        child: Observer(builder: (_) {
+                          return Text(
+                            store.priorityMessage,
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 16.0,
+                            ),
+                          );
+                        }),
                       ),
                     ),
                     Expanded(
@@ -56,12 +62,12 @@ class AlertPriorityApp extends StatelessWidget {
                               children: [
                                 ElevatedButton(
                                   onPressed: () {
-                                    AlertMessenger.of(context).showAlert(
-                                      alert: const Alert(
+                                    store.showAlert(
+                                      const Alert(
                                         backgroundColor: Colors.red,
                                         leading: Icon(Icons.error),
                                         priority: AlertPriority.error,
-                                        child: Text('Oops, ocorreu um erro. Pedimos desculpas.'),
+                                        message: 'Oops, ocorreu um erro. Pedimos desculpas.',
                                       ),
                                     );
                                   },
@@ -80,12 +86,12 @@ class AlertPriorityApp extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    AlertMessenger.of(context).showAlert(
-                                      alert: const Alert(
+                                    store.showAlert(
+                                      const Alert(
                                         backgroundColor: Colors.amber,
                                         leading: Icon(Icons.warning),
                                         priority: AlertPriority.warning,
-                                        child: Text('Atenção! Você foi avisado.'),
+                                        message: 'Atenção! Você foi avisado.',
                                       ),
                                     );
                                   },
@@ -104,12 +110,12 @@ class AlertPriorityApp extends StatelessWidget {
                                 ),
                                 ElevatedButton(
                                   onPressed: () {
-                                    AlertMessenger.of(context).showAlert(
-                                      alert: const Alert(
+                                    store.showAlert(
+                                      const Alert(
                                         backgroundColor: Colors.green,
                                         leading: Icon(Icons.info),
                                         priority: AlertPriority.info,
-                                        child: Text('Este é um aplicativo escrito em Flutter.'),
+                                        message: 'Este é um aplicativo escrito em Flutter.',
                                       ),
                                     );
                                   },
@@ -134,7 +140,7 @@ class AlertPriorityApp extends StatelessWidget {
                                 vertical: 16.0,
                               ),
                               child: ElevatedButton(
-                                onPressed: AlertMessenger.of(context).hideAlert,
+                                onPressed: store.hideAlert,
                                 child: const Text('Hide alert'),
                               ),
                             ),

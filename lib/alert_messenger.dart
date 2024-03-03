@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:priority/main.dart';
 
-const kAlertHeight = 80.0;
+const kAlertHeight = 58.0;
 
 enum AlertPriority {
   error(2),
@@ -11,17 +12,17 @@ enum AlertPriority {
   final int value;
 }
 
-class Alert extends StatelessWidget {
+class Alert extends StatelessWidget implements Comparable {
   const Alert({
     super.key,
     required this.backgroundColor,
-    required this.child,
+    required this.message,
     required this.leading,
     required this.priority,
   });
 
   final Color backgroundColor;
-  final Widget child;
+  final String message;
   final Widget leading;
   final AlertPriority priority;
 
@@ -50,7 +51,7 @@ class Alert extends StatelessWidget {
                   Expanded(
                     child: DefaultTextStyle(
                       style: const TextStyle(color: Colors.white),
-                      child: child,
+                      child: Text(message),
                     ),
                   ),
                 ],
@@ -61,6 +62,14 @@ class Alert extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  int compareTo(other) {
+    if (other is Alert) {
+      return priority.value.compareTo(other.priority.value);
+    }
+    return -1;
   }
 }
 
@@ -95,8 +104,6 @@ class AlertMessengerState extends State<AlertMessenger> with TickerProviderState
   late final AnimationController controller;
   late final Animation<double> animation;
 
-  Widget? alertWidget;
-
   @override
   void initState() {
     super.initState();
@@ -105,6 +112,8 @@ class AlertMessengerState extends State<AlertMessenger> with TickerProviderState
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
+
+    store.controller = controller;
   }
 
   @override
@@ -120,15 +129,6 @@ class AlertMessengerState extends State<AlertMessenger> with TickerProviderState
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-
-  void showAlert({required Alert alert}) {
-    setState(() => alertWidget = alert);
-    controller.forward();
-  }
-
-  void hideAlert() {
-    controller.reverse();
   }
 
   @override
@@ -149,11 +149,12 @@ class AlertMessengerState extends State<AlertMessenger> with TickerProviderState
                 child: widget.child,
               ),
             ),
+            if (store.alerts.isNotEmpty) ...store.alerts.take(store.alerts.length - 1),
             Positioned(
               top: animation.value,
               left: 0,
               right: 0,
-              child: alertWidget ?? const SizedBox.shrink(),
+              child: store.alerts.lastOrNull ?? const SizedBox.shrink(),
             ),
           ],
         );
